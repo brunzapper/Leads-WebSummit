@@ -321,12 +321,28 @@ function selectCompany(company, slide=true) {
     document.getElementById('list-panel').classList.add('slide-out');
     document.getElementById('detail-panel').classList.add('slide-in');
     document.getElementById('back-label').textContent = company.c;
+    // Push a history entry so the device back button returns to the list
+    if (!history.state || !history.state.detail) {
+      history.pushState({ detail: true }, '');
+    }
   }
 }
 function goBack() {
   document.getElementById('list-panel').classList.remove('slide-out');
   document.getElementById('detail-panel').classList.remove('slide-in');
 }
+
+// Intercept the device / browser back button on mobile
+window.addEventListener('popstate', e => {
+  if (isMobile()) {
+    const panel = document.getElementById('detail-panel');
+    if (panel.classList.contains('slide-in')) {
+      goBack();
+      // Re-push so successive back presses still work before truly leaving
+      // (no re-push here — we want a clean stack after dismissal)
+    }
+  }
+});
 
 function renderDetail(company) {
   const content = document.getElementById('detail-content');
